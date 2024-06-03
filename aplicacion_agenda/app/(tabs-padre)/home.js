@@ -8,7 +8,6 @@ import {
   Pressable, 
   SafeAreaView,
   FlatList, 
-  RefreshControl,
 } from 'react-native';
 import { useEffect, useState } from 'react';
 import { AntDesign } from "@expo/vector-icons";
@@ -23,7 +22,6 @@ export default function HomeScreen() {
   const [todos, setTodos] = useState([]);
   const [data, setData] = useState([]);
   const [userId, setUserId] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
 
   const today = moment().format("MMM Do");
   const [isModalVisible, setModalVisible] = useState(false);
@@ -55,12 +53,7 @@ export default function HomeScreen() {
       fetchAnotaciones(userId);
     }
   }, [userId]);
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchData(userId);      // Vuelve a obtener las tareas
-    await fetchAnotaciones(userId); // Vuelve a obtener las anotaciones
-    setRefreshing(false);
-  };
+
   const getUserId = async () => {
     try {
       const id = await AsyncStorage.getItem('userId');
@@ -125,9 +118,6 @@ export default function HomeScreen() {
             }
             renderItem={null}
             keyExtractor={(item, index) => index.toString()}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
           />
         );
     }

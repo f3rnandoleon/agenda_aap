@@ -2,24 +2,24 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const TareasList = ({ tareas }) => {
-  
+const AnotacionesList = ({ anotaciones }) => {
+
+
   const renderItem = ({ item }) => (
-    <View style={[styles.tareaContainer, { backgroundColor: "#FF6F61" }]}>
-      <MaterialIcons name="assignment" size={32} color="#FFF" style={styles.taskIcon} />
-      <View style={styles.tareaInfo}>
-        <Text style={styles.titulo}>{item.titulo}</Text>
-        <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Descripción:</Text> {item.descripcion}
-        </Text>
-        <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Curso:</Text> {item.nombre_curso}
+    <View style={[styles.anotacionContainer, { backgroundColor: '#FFD166' }]}>
+      <MaterialIcons name="note" size={32} color="#FFF" style={styles.noteIcon} />
+      <View style={styles.anotacionInfo}>
+        <Text style={styles.contenido}>
+          <Text style={styles.bold}>Contenido:</Text> {item.contenido}
         </Text>
         <Text style={styles.descripcion}>
           <Text style={styles.bold}>Profesor:</Text> {item.nombre_profesor}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Fecha de entrega:</Text> {formatDate(item.fecha_entrega)}
+          <Text style={styles.bold}>Correo del profesor:</Text> {item.email_profesor}
+        </Text>
+        <Text style={styles.descripcion}>
+          <Text style={styles.bold}>Fecha:</Text> {formatDate(item.fecha)}
         </Text>
       </View>
     </View>
@@ -32,9 +32,9 @@ const TareasList = ({ tareas }) => {
 
   return (
     <FlatList
-      data={tareas}
+      data={anotaciones}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id_tarea.toString()}
+      keyExtractor={(item) => item.id_anotacion.toString()}
       contentContainerStyle={styles.container}
     />
   );
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
   },
-  tareaContainer: {
+  anotacionContainer: {
     borderRadius: 15,
     padding: 20,
     marginVertical: 10,
@@ -56,13 +56,13 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  taskIcon: {
+  noteIcon: {
     marginRight: 15,
   },
-  tareaInfo: {
+  anotacionInfo: {
     flex: 1,
   },
-  titulo: {
+  contenido: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFF',
@@ -78,4 +78,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TareasList;
+export default AnotacionesList;

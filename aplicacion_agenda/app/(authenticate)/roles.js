@@ -9,10 +9,7 @@ const roles = () => {
       <Text style={styles.title}>Creando futuros brillantes</Text>
       <View style={styles.cardContainer}>
 
-      <Pressable style={styles.card} onPress={() => router.replace("/(authenticate)/loginProfesor")}>
-          <Image source={require('../../assets/images/profesor.png')} style={styles.cardImage} />
-          <Text style={styles.cardText}>Soy un padre de familia</Text>
-        </Pressable>
+      
         <Pressable style={styles.card} onPress={() => router.replace("/(authenticate)/loginPadre")}>
           <Image source={require('../../assets/images/padre.png')} style={styles.cardImage} />
           <Text style={styles.cardText}>Soy un padre de familia</Text>
@@ -50,7 +47,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e6f7ff',
     borderRadius: 10,
     padding: 10,
-    marginBottom:'30px',
+    marginBottom:50,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

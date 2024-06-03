@@ -10,8 +10,8 @@ import {
 import React, { useState, useEffect } from "react";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import CryptoJS from 'crypto-js';
-import {ip} from "../../constants/ip";
+import bcrypt from 'bcryptjs';
+import { ip } from "../../constants/ip";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
@@ -23,14 +23,9 @@ const Login = () => {
   useEffect(() => {
     fetchData();
   }, []);
-  
-  const encryptPassword = (password) => {
-    return CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
-  };
 
   const fetchData = async () => {
     try {
-
       const response = await fetch(`http://${ip()}/alumns`);
       console.log(ip());
       const data = await response.json();
@@ -40,15 +35,18 @@ const Login = () => {
     }
   };
 
-  const handleLogin = () => {
-    const hashedPassword = encryptPassword(password);
-    const user = users.find(user => user.email === carnet && user.phone === hashedPassword);
-
+  const handleLogin = async () => {
+    const user = users.find(user => user.email === carnet);
     if (user) {
-      AsyncStorage.setItem('userId', user.id.toString());
-      router.replace("/(tabs-estudiante)/home");
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (isPasswordCorrect) {
+        await AsyncStorage.setItem('userId', user.id_estudiante.toString());
+        router.replace("/(tabs-estudiante)/home");
+      } else {
+        alert("Contraseña incorrecta");
+      }
     } else {
-      alert("Carnet o contraseña incorrectos");
+      alert("email no encontrado");
     }
   };
 
@@ -113,6 +111,7 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop:30,
     backgroundColor: "white",
     alignItems: "center",
   },

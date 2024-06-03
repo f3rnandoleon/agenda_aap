@@ -61,11 +61,7 @@ export default function HomeScreen() {
       console.error("Error fetching user data:", error);
     }
   };
-  const encryptPassword = (password) => {
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
-    return hashedPassword;
-  };
+
 
 
   const handleLogout = async () => {
@@ -77,7 +73,11 @@ export default function HomeScreen() {
       console.error('Error removing userId:', error);
     }
   };
-
+  const encryptPassword = (password) => {
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+    return hashedPassword;
+  };
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
       setError("Las contraseñas no coinciden");

@@ -2,24 +2,27 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const CitacionList = ({ tareas }) => {
+const CitacionList = ({ citaciones }) => {
 
   const renderItem = ({ item }) => (
     <View style={styles.tareaContainer}>
       <MaterialIcons name="assignment" size={32} color="black" style={styles.taskIcon} />
       <View style={styles.tareaInfo}>
-        <Text style={styles.titulo}>Tarea asignado por {item.nombre_profesor}</Text>
+        <Text style={styles.titulo}>Citacion asignada por {item.nombre_profesor}</Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Descripción:</Text> {item.motivo_de_citacion}
+          <Text style={styles.bold}>Motivo:</Text> {item.motivo}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Equipo:</Text> {item.nombre_equipo}
+          <Text style={styles.bold}>Grado:</Text> {item.grado}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Estudiante:</Text> {item.name} {item.lastname}
+          <Text style={styles.bold}>Curso:</Text> {item.curso}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Fecha de entrega:</Text> {formatDate(item.date_at)}
+          <Text style={styles.bold}>Estudiante:</Text> {item.nombre_estudiante}
+        </Text>
+        <Text style={styles.descripcion}>
+          <Text style={styles.bold}>Fecha de citación:</Text> {formatDate(item.fecha)}
         </Text>
       </View>
     </View>
@@ -32,9 +35,9 @@ const CitacionList = ({ tareas }) => {
 
   return (
     <FlatList
-      data={tareas}
+      data={citaciones}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item) => item.id_citacion.toString()}
       contentContainerStyle={styles.container}
     />
   );
@@ -66,18 +69,15 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'Roboto-Bold',
     color: 'black',
     marginBottom: 8,
   },
   descripcion: {
     fontSize: 18,
-    fontFamily: 'Roboto-Regular',
     marginBottom: 5,
     color: 'black',
   },
   bold: {
-    fontFamily: 'Roboto-Bold',
     fontWeight: 'bold',
   },
 });

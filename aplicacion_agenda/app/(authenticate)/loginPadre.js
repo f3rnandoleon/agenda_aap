@@ -30,22 +30,25 @@ const login = () => {
     return CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
   };
   async function fetchData() {
-    const response = await fetch("http://192.168.43.133/alumns");
+    const response = await fetch(`http://${ip()}/parents`);
     const data = await response.json();
     setUsers(data);
   }
   
-  const handleLogin = () => {
+  const handleLogin = async() => {
     const hashedPassword = encryptPassword(password);
-    const user = users.find(user => user.email_padre === carnet && user.clave_padre === hashedPassword);
+    const user = users.find(user => user.email === carnet && user.password === hashedPassword);
 
     if (user) {
-      AsyncStorage.setItem('userId', user.id.toString());
-      console.log(user.id)
-      router.replace("/(tabs-padre)/home");
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (isPasswordCorrect) {
+        await AsyncStorage.setItem('userId', user.id_estudiante.toString());
+        router.replace("/(tabs-estudiante)/home");
+      } else {
+        alert("Contraseña incorrecta");
+      }
     } else {
-
-      alert("Carnet o contraseña incorrectos");
+      alert("email no encontrado");
     }
   };
   return (

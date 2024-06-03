@@ -1,5 +1,5 @@
 import express from "express";
-import { getTodoByID,getUsers,getTasksByID,getCitacionesByID,getUserByEmail,createTodo,shareTodo, getAlumns, getAlumnByID,updatePassword } from './database.js';
+import { getTodoByID,getUsers,getTasksByID,getCitacionesByID,getUserByEmail,createTodo,shareTodo, getAlumns, getAlumnByID,updatePassword, getParents, getAnotacionesByID } from './database.js';
 import cors from "cors"; 
 const corsOptions = { 
 origin: "*", // specify the allowed origin |
@@ -41,6 +41,16 @@ app.get("/tasks/:id", async (req, res) => {
     });
   
 });
+app.get("/anotaciones/:id", async (req, res) => {
+  await getAnotacionesByID(req.params.id)
+  .then((user) => {
+      res.status(200).send(user);
+    })
+  .catch((error) => {
+      console.error(error);
+    });
+  
+});
 app.get("/citaciones/:id", async (req, res) => {
   await getCitacionesByID(req.params.id)
   .then((user) => {
@@ -62,6 +72,16 @@ app.get("/usuarios/", async (req, res) => {
 });
 app.get("/alumns/", async (req, res) => {
   await getAlumns()
+  .then((user) => {
+      res.status(200).send(user);
+    })
+  .catch((error) => {
+      console.error(error);
+    });
+  
+});
+app.get("/parents/", async (req, res) => {
+  await getParents()
   .then((user) => {
       res.status(200).send(user);
     })
