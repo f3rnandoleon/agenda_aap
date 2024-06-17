@@ -6,13 +6,18 @@ import {
   KeyboardAvoidingView,
   TextInput,
   Pressable,
+  Image,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import bcrypt from 'bcryptjs';
+import CryptoJS from 'crypto-js';
 import { ip } from "../../constants/ip";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, query, where, getDocs, addDoc } from "firebase/firestore"; 
+import { firebaseConfig } from '../../firebase-config';
 
 const Login = () => {
   const router = useRouter();
@@ -20,30 +25,35 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [users, setUsers] = useState([]); 
 
+  const app = initializeApp(firebaseConfig);
+  //const auth = getAuth(app);
+  const db = getFirestore(app);
+  
   useEffect(() => {
-    fetchData();
+    fetchEstudiantes();
   }, []);
-
-  const fetchData = async () => {
-    try {
-      console.log(ip());
-      const response = await fetch(`http://${ip()}/alumns`);
-      
-      const data = await response.json();
-      console.log(data);
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
+  const encryptPassword = (password) => {
+    return CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
   };
+  async function fetchEstudiantes() {
+    const q = query(collection(db, 'estudiantes'));
+    const estudiantesData = (await getDocs(q)).docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+    setUsers(estudiantesData);
+}
+
 
   const handleLogin = async () => {
-    const user = users.find(user => user.email === carnet);
+    const hashedPassword = encryptPassword(password);
+    const user = users.find(user => user.correo === carnet );
     if (user) {
-      const isPasswordCorrect = await bcrypt.compare(password, user.password);
-      if (isPasswordCorrect) {
-        await AsyncStorage.setItem('userId', user.id_estudiante.toString());
+      if (user.password===hashedPassword) {
+        
+        await AsyncStorage.setItem('userId', user.id);
         router.replace("/(tabs-estudiante)/home");
+        alert(`Bienvenido ${user.nombre}`);
       } else {
         alert("Contraseña incorrecta");
       }
@@ -68,6 +78,10 @@ const Login = () => {
         </View>
         <View style={styles.credentialsContainer}>
           <Text style={styles.credentialsText}>Ingrese sus Credenciales</Text>
+          <Image
+          source={require('../../assets/logo.png')}
+          style={styles.characterImage}
+        />
         </View>
 
         <View style={styles.inputContainer}>
@@ -128,12 +142,17 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   titleContainer: {
-    marginTop: 80,
+    marginTop: 60,
   },
   titleText: {
     fontSize: 18,
     fontWeight: "600",
     color: "#0066b2",
+  },
+  characterImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
   },
   welcomeContainer: {
     alignItems: "center",
@@ -141,7 +160,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 18,
     fontWeight: "600",
-    marginTop: 20,
+    marginTop: 10,
   },
   credentialsContainer: {
     alignItems: "center",
@@ -149,10 +168,10 @@ const styles = StyleSheet.create({
   credentialsText: {
     fontSize: 18,
     fontWeight: "600",
-    marginTop: 25,
+    marginTop: 15,
   },
   inputContainer: {
-    marginTop: 30,
+    marginTop: 0,
   },
   inputWrapper: {
     flexDirection: "row",
@@ -191,7 +210,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginLeft: "auto",
     marginRight: "auto",
-    marginTop: 60,
+    marginTop: 40,
   },
   loginButtonText: {
     textAlign: "center",

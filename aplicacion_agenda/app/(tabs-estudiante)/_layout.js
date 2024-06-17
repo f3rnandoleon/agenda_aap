@@ -43,6 +43,20 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
+        name="calendario"
+        options={{
+          tabBarLabel: "calendario",
+          tabBarLabelStyle: { color: "#7CB9E8" },
+          headerShown: false,
+          tabBarIcon: ({ focused }) =>
+            focused ? (
+              <MaterialCommunityIcons name="calendar" size={34} color="#7CB9E8" />
+            ) : (
+              <MaterialCommunityIcons name="calendar" size={24} color="black" />
+            )
+        }}
+      />
+      <Tabs.Screen
         name="informacion"
         options={{
           tabBarLabel: "Perfil",
