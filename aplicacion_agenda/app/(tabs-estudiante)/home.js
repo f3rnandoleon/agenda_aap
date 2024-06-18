@@ -19,8 +19,8 @@ import TareasList from '../../components/TareaList';
 import AnotacionesList from '../../components/AnotacionesList';
 
 export default function HomeScreen() {
-  const [todos, setTodos] = useState([]);
-  const [data, setData] = useState([]);
+  const [tareas, setTareas] = useState([]);
+  const [anotaciones, setAnotaciones] = useState([]);
   const [userId, setUserId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -50,13 +50,13 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (userId) {
-      fetchData(userId);
+      fetchTareas(userId);
       fetchAnotaciones(userId);
     }
   }, [userId]);
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchData(userId);      // Vuelve a obtener las tareas
+    await fetchTareas(userId);      // Vuelve a obtener las tareas
     await fetchAnotaciones(userId); // Vuelve a obtener las anotaciones
     setRefreshing(false);
   };
@@ -72,20 +72,29 @@ export default function HomeScreen() {
   };
 
   async function fetchAnotaciones (userId)  {
-    try {
-      const response = await fetch(`http://${ip()}/anotaciones/${userId}`);
-      const data = await response.json();
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+    if (userId) {
+      const q = query(collection(db, nombreColeccion), where(nombreAtributo, '==', valor));
+    const querySnapshot = await getDocs(q);
+    
+    const documentos = [];
+    querySnapshot.forEach((doc) => {
+      documentos.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    return documentos;
+    } else {
+      console.log("Error al localizar identificacion del usuario");
     }
   };
 
-  async function fetchData(userId) {
+  async function fetchTareas(userId) {
     try {
       const response = await fetch(`http://${ip()}/tasks/${userId}`);
       const data = await response.json();
-      setTodos(data);
+      setTareas(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -100,17 +109,17 @@ export default function HomeScreen() {
   }
   const combineData = () => {
     const combined = [
-      ...todos.map((item) => ({ ...item, type: 'tarea' })),
-      ...data.map((item) => ({ ...item, type: 'anotacion' }))
+      ...tareas.map((item) => ({ ...item, type: 'tarea' })),
+      ...anotaciones.map((item) => ({ ...item, type: 'anotacion' }))
     ];
     return combined;
   };
   const renderContent = () => {
     switch (categoria) {
       case "Tareas":
-        return <TareasList tareas={todos} />;
+        return <TareasList tareas={tareas} />;
       case "Anotaciones":
-        return <AnotacionesList anotaciones={data} />;
+        return <AnotacionesList anotaciones={anotaciones} />;
       case "Todos":
       default:
         return (
@@ -118,8 +127,8 @@ export default function HomeScreen() {
             data={[]}
             ListHeaderComponent={
               <>
-                <TareasList tareas={todos} />
-                <AnotacionesList anotaciones={data} />
+                <TareasList tareas={tareas} />
+                <AnotacionesList anotaciones={anotaciones} />
               </>
             }
             renderItem={null}
@@ -154,7 +163,7 @@ export default function HomeScreen() {
       </View>
 
         <SafeAreaView style={styles.tasksContainer}>
-          {todos?.length > 0 && todos!=undefined ? (
+          {tareas?.length > 0 && tareas!=undefined ? (
              
               renderContent()
               
