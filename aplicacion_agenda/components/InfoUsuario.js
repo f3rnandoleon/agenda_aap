@@ -1,57 +1,134 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet,Image } from 'react-native';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, addDoc } from "firebase/firestore"; 
+import { firebaseConfig } from '../firebase-config';
 
-const InfoUsuario = ({ user, rol }) => {
+const InfoUsuario = ({ user, role }) => {
+  const [padreData, setPadreData] = useState(null);
+  const [estudianteData, setEstudianteData] = useState(null);
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
   const formatDate = (fecha) => {
     const date = new Date(fecha);
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
+const fetchPadreData = async () => {
+    try {
+      const padreDocRef = user.id_padre;
+      const docSnap = await getDoc(padreDocRef);
+      if (docSnap.exists()) {
+        const data= docSnap.data();
+        setPadreData(data);
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error getting document:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPadreData()
+  }, [user.id_padre]);
+  const renderStudentInfo = () => (
+    <>
+      <Text style={styles.name}>{user.nombre} {user.apellido}</Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Correo electrónico:</Text> {user.correo}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Teléfono:</Text> {user.telefono}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Dirección:</Text> {user.direccion}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Fecha de nacimiento:</Text> {formatDate(user.fecha_nacimiento)}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Carnet:</Text> {user.carnet}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Género:</Text> {user.genero}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>ID Curso:</Text> {user.id_curso}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Padre:</Text> {padreData ? `${padreData.nombre} ${padreData.apellido}` : "no asignado"}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Alergias:</Text> {user.alergias ? user.alergias.join(', ') : ''}
+      </Text>
+      {padreData && (
+        <>
+          <Text style={styles.sectionTitle}>Información del tutor</Text>
+          <Text style={styles.name}>{padreData.nombre} {padreData.apellido}</Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Correo electrónico:</Text> {padreData.correo}
+          </Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Teléfono:</Text> {padreData.telefono}
+          </Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Dirección:</Text> {padreData.direccion}
+          </Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Fecha de nacimiento:</Text> {formatDate(padreData.fecha_nacimiento)}
+          </Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Carnet:</Text> {padreData.carnet}
+          </Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Género:</Text> {padreData.genero}
+          </Text>
+          <Text style={styles.field}>
+            <Text style={styles.label}>Ocupacion:</Text> {padreData.ocupacion}
+          </Text>
+        </>
+      )}
+    </>
+  );
+
+  const renderParentInfo = () => (
+    <>
+      <Text style={styles.name}>{user.nombre} {user.apellido}</Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Correo electrónico:</Text> {user.correo}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Teléfono:</Text> {user.telefono}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Dirección:</Text> {user.direccion}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Fecha de nacimiento:</Text> {formatDate(user.fecha_nacimiento)}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Carnet:</Text> {user.carnet}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Género:</Text> {user.genero}
+      </Text>
+      <Text style={styles.field}>
+        <Text style={styles.label}>Ocupacion:</Text> {user.ocupacion}
+      </Text>
+    </>
+  );
 
   return (
     <View style={styles.itemContainer}>
       
-        {rol === "estudiante" ? (
-          <View style={styles.infoContainer}>
-          <Image source={{ uri: `https://example.com/images`}} style={styles.profileImage} />
-            <Text style={styles.name}>{user.nombre} {user.apellido}</Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Correo electrónico:</Text> {user.correo}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Teléfono:</Text> {user.telefono}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Dirección:</Text> {user.direccion}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Fecha de nacimiento:</Text> {formatDate(user.fecha_nacimiento)}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Carnet:</Text> {user.carnet}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Género:</Text> {user.genero}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>ID Curso:</Text> {user.id_curso}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>ID Padre:</Text> {user.id_padre}
-            </Text>
-            <Text style={styles.field}>
-              <Text style={styles.label}>Alergias:</Text> {user.alergias ? user.alergias.join(', ') : ''}
-            </Text>
-            </View>
-        ):(
-            <>
-                
-            </>
-        )}
-      
+      <View style={styles.infoContainer}>
+      <Image source={{ uri: `https://example.com/images` }} style={styles.profileImage} />
+        {role === 'estudiante' ? renderStudentInfo() : renderParentInfo()}
+      </View>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
     itemContainer: {
         flexDirection: 'row',
@@ -93,7 +170,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
       },
       sectionTitle: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 'bold',
         marginTop: 16,
         marginBottom: 8,

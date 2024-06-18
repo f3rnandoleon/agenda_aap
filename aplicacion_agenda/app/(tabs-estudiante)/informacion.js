@@ -18,11 +18,11 @@ import { ip } from "../../constants/ip";
 import moment from "moment";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, addDoc } from "firebase/firestore"; 
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, addDoc,updateDoc } from "firebase/firestore"; 
 import { firebaseConfig } from '../../firebase-config';
 import InfoUsuario from '../../components/InfoUsuario';
 import Cargando from '../../components/Cargando';
-
+import CryptoJS from 'crypto-js';
 export default function HomeScreen() {
   const [todos, setTodos] = useState({});
   const [userId, setUserId] = useState(null);
@@ -34,7 +34,9 @@ export default function HomeScreen() {
   const router = useRouter();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-
+  const encryptPassword = (password) => {
+    return CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+  };
   useEffect(() => {
     getUserId();
   }, []);
@@ -91,19 +93,12 @@ export default function HomeScreen() {
 
     try {
       const hashedPassword = encryptPassword(newPassword);
-      const response = await fetch(`http://${ip()}/alumn/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          value: hashedPassword,
-        }),
-      });
+      const estudianteRef = doc(db, 'estudiantes', userId);
 
-      if (!response.ok) {
-        throw new Error("Error al cambiar la contraseña");
-      }
+    // Actualizar el campo específico
+    await updateDoc(estudianteRef, {
+      password: hashedPassword,
+    });   
       alert("Contraseña Cambiada correctamente");
       setChangePasswordModalVisible(false);
     } catch (error) {
@@ -124,7 +119,6 @@ export default function HomeScreen() {
       </View>
       <ScrollView contentContainerStyle={styles.listContent}>
         <InfoUsuario user={todos} role="estudiante"/>
-        {userId.id_padre ? <InfoUsuario user={todos} rol="padre"/>:null }
       </ScrollView>
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
