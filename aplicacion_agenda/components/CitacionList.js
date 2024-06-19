@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const CitacionList = ({ citaciones }) => {
-
   const renderItem = ({ item }) => (
     <View style={styles.tareaContainer}>
       <MaterialIcons name="assignment" size={32} color="black" style={styles.taskIcon} />
@@ -37,7 +36,7 @@ const CitacionList = ({ citaciones }) => {
     <FlatList
       data={citaciones}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id_citacion.toString()}
+      keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.container}
     />
   );
