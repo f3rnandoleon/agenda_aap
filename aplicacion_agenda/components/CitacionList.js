@@ -3,22 +3,23 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const CitacionList = ({ citaciones }) => {
+  
   const renderItem = ({ item }) => (
     <View style={styles.tareaContainer}>
       <MaterialIcons name="assignment" size={32} color="black" style={styles.taskIcon} />
       <View style={styles.tareaInfo}>
-        <Text style={styles.titulo}>Citacion asignada por {item.nombre_profesor}</Text>
+        <Text style={styles.titulo}> {item.titulo}</Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Motivo:</Text> {item.motivo}
+          <Text style={styles.bold}>Motivo:</Text> {item.descripcion}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Grado:</Text> {item.grado}
+          <Text style={styles.bold}>Tipo:</Text> {item.tipo}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Curso:</Text> {item.curso}
+          <Text style={styles.bold}>Asignado por:</Text> {item.nombre_prof}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Estudiante:</Text> {item.nombre_estudiante}
+          <Text style={styles.bold}>Estado:</Text> {item.estado ? 'Activo' : 'Inactivo'}
         </Text>
         <Text style={styles.descripcion}>
           <Text style={styles.bold}>Fecha de citación:</Text> {formatDate(item.fecha)}
