@@ -13,10 +13,13 @@ import { useEffect, useState } from 'react';
 import { AntDesign } from "@expo/vector-icons";
 import { BottomModal, ModalTitle, ModalContent, SlideAnimation } from "react-native-modals";
 import moment from "moment";
-import {ip} from "../../constants/ip";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TareasList from '../../components/TareaList';
 import AnotacionesList from '../../components/AnotacionesList';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, addDoc,updateDoc } from "firebase/firestore"; 
+import { firebaseConfig } from '../../firebase-config';
+import Cargando from '../../components/Cargando';
 
 export default function HomeScreen() {
   const [tareas, setTareas] = useState([]);
@@ -29,6 +32,8 @@ export default function HomeScreen() {
   const [category, setCategory] = useState("All");
   const [todo, setTodo] = useState("");
   const [categoria, setCategoria] = useState("Todos");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
   const getButtonStyle = (buttonCategoria) => {
     return [
       styles.categoryButton,
@@ -50,7 +55,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (userId) {
-      fetchTareas(userId);
+      fetchTareasEstudiante(userId);
       fetchAnotaciones(userId);
     }
   }, [userId]);
@@ -71,49 +76,82 @@ export default function HomeScreen() {
     }
   };
 
+
   async function fetchAnotaciones (userId)  {
+    console.log(userId);
     if (userId) {
-      const q = query(collection(db, nombreColeccion), where(nombreAtributo, '==', valor));
-    const querySnapshot = await getDocs(q);
-    
-    const documentos = [];
-    querySnapshot.forEach((doc) => {
+      const userRef = doc(db, "estudiantes", userId);  // Crear la referencia al documento del estudiante
+      const q = query(collection(db, "anotaciones"), where('id_est', '==', userRef));
+      const querySnapshot = await getDocs(q);
+      const documentos = [];
+      querySnapshot.forEach((doc) => {
       documentos.push({
         id: doc.id,
         ...doc.data()
       });
     });
-
-    return documentos;
+    console.log(documentos);
+    setAnotaciones(documentos)
     } else {
       console.log("Error al localizar identificacion del usuario");
     }
   };
 
-  async function fetchTareas(userId) {
+  async function fetchTareasEstudiante(userId) {
     try {
-      const response = await fetch(`http://${ip()}/tasks/${userId}`);
-      const data = await response.json();
-      setTareas(data);
+      // 1. Obtener el documento del estudiante
+      const estudianteRef = doc(db, "estudiantes", userId);
+      const estudianteDoc = await getDoc(estudianteRef);
+  
+      if (!estudianteDoc.exists()) {
+        console.log("No se encontró el estudiante");
+        return;
+      }
+  
+      const estudianteData = estudianteDoc.data();
+      const idCursoRef = estudianteData.id_curso;
+  
+      if (!idCursoRef) {
+        console.log("El estudiante no tiene curso asignado");
+        return;
+      }
+  
+      // 2. Obtener el documento del curso
+      const cursoDoc = await getDoc(idCursoRef);
+      if (!cursoDoc.exists()) {
+        console.log("No se encontró el curso");
+        return;
+      }
+  
+      const cursoData = cursoDoc.data();
+      const materiasRefs = cursoData.id_materias;
+  
+      // 3. Obtener las tareas de cada materia
+      const tareass = [];
+      for (const materiaRef of materiasRefs) {
+        const tareasQuery = query(collection(db, "tareas"), where('idmateria', '==', materiaRef));
+        const tareasSnapshot = await getDocs(tareasQuery);
+        tareasSnapshot.forEach((doc) => {
+          tareass.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+      }
+  
+      console.log(tareass);
+      setTareas(tareass)
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error al obtener las tareas: ", error);
     }
   }
 
   if (!userId) {
     return (
-      <View style={styles.container}>
-        <Text>Cargando...</Text>
-      </View>
+      <Cargando />
     );
   }
-  const combineData = () => {
-    const combined = [
-      ...tareas.map((item) => ({ ...item, type: 'tarea' })),
-      ...anotaciones.map((item) => ({ ...item, type: 'anotacion' }))
-    ];
-    return combined;
-  };
+
   const renderContent = () => {
     switch (categoria) {
       case "Tareas":

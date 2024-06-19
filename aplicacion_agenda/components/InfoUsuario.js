@@ -6,6 +6,7 @@ import { firebaseConfig } from '../firebase-config';
 
 const InfoUsuario = ({ user, role }) => {
   const [padreData, setPadreData] = useState(null);
+  const [cursoData, setCursoData] = useState(null);
   const [estudianteData, setEstudianteData] = useState(null);
 
   const app = initializeApp(firebaseConfig);
@@ -28,10 +29,28 @@ const fetchPadreData = async () => {
       console.error("Error getting document:", error);
     }
   };
+  const fetchCursoData = async () => {
+    try {
+      const cursoDocRef = user.id_curso;
+      const docSnap = await getDoc(cursoDocRef);
+      if (docSnap.exists()) {
+        const data= docSnap.data();
+        setCursoData(data);
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error getting document:", error);
+    }
+  };
 
   useEffect(() => {
     fetchPadreData()
   }, [user.id_padre]);
+
+  useEffect(() => {
+    fetchCursoData()
+  }, [user.id_curso]);
   const renderStudentInfo = () => (
     <>
       <Text style={styles.name}>{user.nombre} {user.apellido}</Text>
@@ -54,7 +73,7 @@ const fetchPadreData = async () => {
         <Text style={styles.label}>Género:</Text> {user.genero}
       </Text>
       <Text style={styles.field}>
-        <Text style={styles.label}>ID Curso:</Text> {user.id_curso}
+        <Text style={styles.label}>Curso:</Text> {cursoData ? `${cursoData.nombre} ${cursoData.paralelo}` : "no asignado"}
       </Text>
       <Text style={styles.field}>
         <Text style={styles.label}>Padre:</Text> {padreData ? `${padreData.nombre} ${padreData.apellido}` : "no asignado"}
@@ -62,7 +81,7 @@ const fetchPadreData = async () => {
       <Text style={styles.field}>
         <Text style={styles.label}>Alergias:</Text> {user.alergias ? user.alergias.join(', ') : ''}
       </Text>
-      {padreData && (
+      {padreData ? (
         <>
           <Text style={styles.sectionTitle}>Información del tutor</Text>
           <Text style={styles.name}>{padreData.nombre} {padreData.apellido}</Text>
@@ -88,7 +107,7 @@ const fetchPadreData = async () => {
             <Text style={styles.label}>Ocupacion:</Text> {padreData.ocupacion}
           </Text>
         </>
-      )}
+      ):(<></>)}
     </>
   );
 
@@ -124,7 +143,7 @@ const fetchPadreData = async () => {
       
       <View style={styles.infoContainer}>
       <Image source={{ uri: `https://example.com/images` }} style={styles.profileImage} />
-        {role === 'estudiante' ? renderStudentInfo() : renderParentInfo()}
+        {role === "estudiante" ? renderStudentInfo() : renderParentInfo()}
       </View>
     </View>
   );

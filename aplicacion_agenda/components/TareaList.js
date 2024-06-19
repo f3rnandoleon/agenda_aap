@@ -1,9 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc,getDocs,collection } from 'firebase/firestore'; 
+import { firebaseConfig } from '../firebase-config';
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const TareasList = ({ tareas }) => {
+  const [materias, setMaterias] = useState([]);
+  useEffect(() => {
+    fetchMaterias();
+  }, []);
+  async function fetchMaterias ()  {
+    try {
+      const querySnapshot = await getDocs(collection(db, "materias"));
+      const materiaData = [];
+      querySnapshot.forEach((doc) => {
+        materiaData.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      console.log(materiaData);
+      setMaterias(materiaData);
+    } catch (error) {
+      console.error("Error al obtener los documentos: ", error);
+    }
+  }
+  const getMateriaName = (MateriaId) => {
   
+    const materia = materias.find(mat => mat.id === MateriaId.id);
+    return materia ? materia.nombre : 'Nombre no encontrado'; // Manejar caso cuando el profesor no se encuentra
+  };
+
   const renderItem = ({ item }) => (
     <View style={[styles.tareaContainer, { backgroundColor: "#FF6F61" }]}>
       <MaterialIcons name="assignment" size={32} color="#FFF" style={styles.taskIcon} />
@@ -13,10 +43,13 @@ const TareasList = ({ tareas }) => {
           <Text style={styles.bold}>Descripción:</Text> {item.descripcion}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Curso:</Text> {item.nombre_curso}
+          <Text style={styles.bold}>Estado:</Text> {item.estado ? 'Activo' : 'Inactivo'}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Profesor:</Text> {item.nombre_profesor}
+          <Text style={styles.bold}>Materia:</Text> {getMateriaName(item.idmateria)}
+        </Text>
+        <Text style={styles.descripcion}>
+          <Text style={styles.bold}>Fecha Asignada:</Text> {formatDate(item.fecha_creacion)}
         </Text>
         <Text style={styles.descripcion}>
           <Text style={styles.bold}>Fecha de entrega:</Text> {formatDate(item.fecha_entrega)}
@@ -34,7 +67,7 @@ const TareasList = ({ tareas }) => {
     <FlatList
       data={tareas}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id_tarea.toString()}
+      keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.container}
     />
   );

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ip} from "../../constants/ip";
 import CitacionList from '../../components/CitacionList';
+import Cargando from '../../components/Cargando';
 
 export default function HomeScreen() {
   const [todos, setTodos] = useState([]);
@@ -48,9 +49,7 @@ export default function HomeScreen() {
 
   if (!userId) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>Cargando...</Text>
-      </View>
+      <Cargando />
     );
   }
 

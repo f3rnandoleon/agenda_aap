@@ -1,30 +1,59 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc,getDocs,collection } from 'firebase/firestore'; 
+import { firebaseConfig } from '../firebase-config';
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const AnotacionesList = ({ anotaciones }) => {
+  const [profesores, setProfesores] = useState([]);
+  useEffect(() => {
+    fetchProfesores();
+  }, []);
+  async function fetchProfesores ()  {
+    try {
+      const querySnapshot = await getDocs(collection(db, "profesores"));
+      const profData = [];
+      querySnapshot.forEach((doc) => {
+        profData.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      console.log(profData);
+      setProfesores(profData);
+    } catch (error) {
+      console.error("Error al obtener los documentos: ", error);
+    }
+  }
+  const getProfesorName = (profesorId) => {
 
-
+    const profesor = profesores.find(prof => prof.id === profesorId.id);
+    return profesor ? profesor.nombre : 'Nombre no encontrado'; // Manejar caso cuando el profesor no se encuentra
+  };
   const renderItem = ({ item }) => (
     <View style={[styles.anotacionContainer, { backgroundColor: '#FFD166' }]}>
       <MaterialIcons name="note" size={32} color="#FFF" style={styles.noteIcon} />
       <View style={styles.anotacionInfo}>
         <Text style={styles.contenido}>
-          <Text style={styles.bold}>Contenido:</Text> {item.contenido}
+          <Text style={styles.bold}>Titulo:</Text> {item.titulo}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Profesor:</Text> {item.nombre_profesor}
+          <Text style={styles.bold}>Descripcion:</Text> {item.descripcion}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Correo del profesor:</Text> {item.email_profesor}
+          <Text style={styles.bold}>Estado:</Text> {item.estado ? 'Activo' : 'Inactivo'}
         </Text>
         <Text style={styles.descripcion}>
-          <Text style={styles.bold}>Fecha:</Text> {formatDate(item.fecha)}
+          <Text style={styles.bold}>Profesor:</Text> {getProfesorName(item.id_profesor)}
+        </Text>
+        <Text style={styles.descripcion}>
+          <Text style={styles.bold}>Fecha Asignada:</Text> {formatDate(item.fecha_creacion)}
         </Text>
       </View>
     </View>
   );
-
   const formatDate = (fecha) => {
     const date = new Date(fecha);
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -34,7 +63,7 @@ const AnotacionesList = ({ anotaciones }) => {
     <FlatList
       data={anotaciones}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id_anotacion.toString()}
+      keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.container}
     />
   );

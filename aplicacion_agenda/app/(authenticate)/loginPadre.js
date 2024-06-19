@@ -64,13 +64,21 @@ const login = () => {
   const handleLogin = async () => {
     const hashedPassword = encryptPassword(password);
     const user = users.find(user => user.correo === carnet );
-    console.log(user.correo);
+    if(user.id_est.id){
+    console.log(user.id_est.id);
+    }
     if (user) {
+      
       if (user.password===hashedPassword) {
-        
-        await AsyncStorage.setItem('userId', user.id);
+        if(user.id_est.id){
+          await AsyncStorage.setItem('userId', user.id_est.id);
+          alert(`Bienvenido ${user.nombre}`);
+          }else{
+            await AsyncStorage.setItem('userId', user.id);
+            alert(`Bienvenido ${user.nombre}`);
+            alert(`este padre no tiene un estudiante asignado`);
+          }
         router.replace("/(tabs-estudiante)/home");
-        alert(`Bienvenido ${user.nombre}`);
       } else {
         alert("Contraseña incorrecta");
       }
